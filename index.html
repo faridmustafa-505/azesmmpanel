@@ -125,16 +125,16 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
     <script>
-        // --- 1. FIREBASE KONFİQURASİYASI (BURANI DƏYİŞİN!) ---
-        // Firebase Console -> Project Settings -> General -> Your apps hissəsindən götürün.
+        // --- 1. FIREBASE KONFİQURASİYASI ---
+        // Sizin təqdim etdiyiniz konfiqurasiya
         const firebaseConfig = {
-              apiKey: "AIzaSyALBhMZoDFowkTROYa1awwo-3FbvmnJJpQ",
-              authDomain: "azesmmpanel0.firebaseapp.com",
-              databaseURL: "https://azesmmpanel0-default-rtdb.firebaseio.com",
-              projectId: "azesmmpanel0",
-              storageBucket: "azesmmpanel0.firebasestorage.app",
-              messagingSenderId: "74060568870",
-              appId: "1:74060568870:web:5f5aed2cbef031c2c149e7"
+            apiKey: "AIzaSyALBhMZoDFowkTROYa1awwo-3FbvmnJJpQ",
+            authDomain: "azesmmpanel0.firebaseapp.com",
+            databaseURL: "https://azesmmpanel0-default-rtdb.firebaseio.com",
+            projectId: "azesmmpanel0",
+            storageBucket: "azesmmpanel0.firebasestorage.app",
+            messagingSenderId: "74060568870",
+            appId: "1:74060568870:web:5f5aed2cbef031c2c149e7"
         };
 
         // Firebase-i işə salırıq
@@ -160,6 +160,7 @@
                     'size': 'invisible', // 'normal' etsəniz görünən robot testi çıxacaq
                     'callback': (response) => {
                         // ReCaptcha həll olundu
+                        console.log("ReCaptcha həll olundu");
                     },
                     'expired-callback': () => {
                         showError("ReCaptcha vaxtı bitdi, yeniləyin.");
@@ -184,11 +185,14 @@
 
             // +994 prefiksini əlavə edirik
             const fullPhoneNumber = "+994" + phoneNumber;
+            console.log("SMS göndərilir: " + fullPhoneNumber);
+            
             const appVerifier = window.recaptchaVerifier;
 
             auth.signInWithPhoneNumber(fullPhoneNumber, appVerifier)
                 .then((result) => {
                     // SMS göndərildi
+                    console.log("SMS uğurla göndərildi");
                     confirmationResult = result;
                     setLoading('send', false);
                     
@@ -201,16 +205,24 @@
                     console.error("SMS Xətası:", error);
                     
                     // ReCaptcha-nı sıfırla ki, yenidən cəhd etmək olsun
-                    window.recaptchaVerifier.render().then(function(widgetId) {
-                        grecaptcha.reset(widgetId);
-                    });
+                    if (window.recaptchaVerifier) {
+                        try {
+                            window.recaptchaVerifier.clear();
+                            window.recaptchaVerifier = null;
+                            renderRecaptcha();
+                        } catch(e) { console.log("Recaptcha reset error", e); }
+                    }
 
                     if (error.code === 'auth/invalid-phone-number') {
                         showError("Nömrə formatı yanlışdır.");
                     } else if (error.code === 'auth/too-many-requests') {
                         showError("Çox sayda cəhd edildi. Bir az sonra yoxlayın.");
+                    } else if (error.code === 'auth/network-request-failed') {
+                        showError("İnternet xətası. Lütfən əlaqəni yoxlayın.");
+                    } else if (error.message.includes("authorized domain")) {
+                        showError("Domen icazəsi yoxdur. Firebase Console-da Authorized Domains-ə əlavə edin.");
                     } else {
-                        showError("SMS göndərilə bilmədi: " + error.message);
+                        showError("Xəta: " + error.message);
                     }
                 });
         }
@@ -230,6 +242,7 @@
             confirmationResult.confirm(code).then((result) => {
                 // Uğurlu giriş
                 const user = result.user;
+                console.log("Uğurlu giriş:", user.uid);
                 setLoading('verify', false);
                 
                 // Uğur ekranına keçid
@@ -279,9 +292,13 @@
             hideError();
             
             // ReCaptcha-nı yenilə
-             window.recaptchaVerifier.render().then(function(widgetId) {
-                grecaptcha.reset(widgetId);
-            });
+            if(window.recaptchaVerifier) {
+                try {
+                    window.recaptchaVerifier.clear();
+                    window.recaptchaVerifier = null;
+                    renderRecaptcha();
+                } catch(e) {}
+            }
         }
     </script>
 </body>
