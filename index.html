@@ -61,7 +61,8 @@
                 <!-- ReCaptcha Container -->
                 <div id="recaptcha-container" class="mt-4 flex justify-center min-h-[78px]"></div>
 
-                <button id="send-code-btn" onclick="sendOTP()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex justify-center items-center shadow-md">
+                <!-- DÜZƏLİŞ: ID 'send-code-btn' yerinə 'send-btn' edildi -->
+                <button id="send-btn" onclick="sendOTP()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex justify-center items-center shadow-md">
                     <span id="send-text">Kodu Göndər</span>
                     <span id="send-loader" class="loader ml-2 hidden"></span>
                 </button>
@@ -213,7 +214,7 @@
                     } else if (error.code === 'auth/too-many-requests') {
                         showError("Çox sayda cəhd edildi. Bir az sonra yoxlayın.");
                     } else if (error.message.includes("401") || error.code === 'auth/network-request-failed') {
-                        showError("API İcazə xətası. Zəhmət olmasa bir neçə dəqiqə gözləyib səhifəni yeniləyin.");
+                        showError("API İcazə xətası (401). API Key yenilənməsi üçün 5 dəqiqə gözləyin.");
                     } else if (error.message.includes("authorized domain")) {
                         showError("Domen icazəsi hələ aktivləşməyib. 1-2 dəqiqə gözləyin.");
                     } else {
@@ -256,6 +257,13 @@
 
         function setLoading(type, isLoading) {
             const btn = document.getElementById(type + '-btn');
+            
+            // DÜZƏLİŞ: Element tapılmazsa xəta verməməsi üçün yoxlama
+            if (!btn) {
+                console.error(`Button with id ${type}-btn not found!`);
+                return;
+            }
+
             const text = document.getElementById(type + '-text');
             const loader = document.getElementById(type + '-loader');
 
