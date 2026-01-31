@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giriş | Mobil Təsdiqləmə</title>
-    <!-- Tailwind CSS (Dizayn üçün) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome (İkonlar üçün) -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* Yükləmə animasiyası */
         .loader {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #3b82f6;
@@ -24,54 +23,51 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Gizli recaptcha üçün stil */
+        .grecaptcha-badge { 
+            visibility: hidden;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 font-sans">
 
-    <!-- Əsas Kart -->
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative">
-        
-        <!-- Başlıq Hissəsi -->
         <div class="bg-blue-600 p-6 text-center">
             <h1 class="text-white text-2xl font-bold">Xoş Gəlmisiniz</h1>
             <p class="text-blue-100 text-sm mt-1">Hesabınıza daxil olun</p>
         </div>
 
         <div class="p-8">
-            
             <!-- Xəta Mesajı -->
             <div id="error-message" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-200 flex items-center">
-                <i class="fas fa-exclamation-circle mr-2"></i>
-                <span id="error-text">Xəta baş verdi.</span>
+                <i class="fas fa-exclamation-circle mr-2 flex-shrink-0"></i>
+                <span id="error-text" class="break-words">Xəta baş verdi.</span>
             </div>
 
-            <!-- Addım 1: Nömrə Daxil Etmə -->
+            <!-- Addım 1 -->
             <div id="step-phone">
                 <label class="block text-gray-700 text-sm font-bold mb-2">Telefon Nömrəsi</label>
                 <div class="flex relative rounded-md shadow-sm">
-                    <!-- Sabit +994 Hissəsi -->
                     <span class="inline-flex items-center px-4 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm font-medium">
                         🇦🇿 +994
                     </span>
-                    <!-- Nömrə Inputu -->
                     <input type="tel" id="phone-number" 
                         class="flex-1 min-w-0 block w-full px-4 py-3 rounded-none rounded-r-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none transition" 
                         placeholder="50 123 45 67"
                         maxlength="9"
                         oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 </div>
-                <p class="text-xs text-gray-400 mt-2">Nümunə: 501234567</p>
+                
+                <!-- ReCaptcha Container -->
+                <div id="recaptcha-container" class="mt-4 flex justify-center min-h-[78px]"></div>
 
-                <!-- ReCaptcha Container (Görünməz olacaq) -->
-                <div id="recaptcha-container" class="mt-4"></div>
-
-                <button id="send-code-btn" onclick="sendOTP()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex justify-center items-center shadow-md hover:shadow-lg transform active:scale-95">
+                <button id="send-code-btn" onclick="sendOTP()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex justify-center items-center shadow-md">
                     <span id="send-text">Kodu Göndər</span>
                     <span id="send-loader" class="loader ml-2 hidden"></span>
                 </button>
             </div>
 
-            <!-- Addım 2: OTP Təsdiqləmə -->
+            <!-- Addım 2 -->
             <div id="step-otp" class="hidden">
                 <div class="text-center mb-6">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600 mb-3">
@@ -99,34 +95,31 @@
                 </button>
             </div>
 
-            <!-- Uğurlu Giriş Ekranı (Nümunə) -->
+            <!-- Uğur -->
             <div id="step-success" class="hidden text-center py-6">
                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-600 mb-4 animate-bounce">
                     <i class="fas fa-check text-3xl"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-gray-800">Uğurlu Giriş!</h2>
                 <p class="text-gray-600 mt-2">Sistemə xoş gəldiniz.</p>
-                <p id="user-uid" class="text-xs text-gray-400 mt-4 break-all"></p>
-                <button onclick="firebase.auth().signOut().then(() => location.reload())" class="mt-6 px-6 py-2 border border-red-500 text-red-500 rounded-full hover:bg-red-50 transition">
+                <p id="user-uid" class="text-xs text-gray-400 mt-4 break-all font-mono bg-gray-50 p-2 rounded"></p>
+                <button onclick="auth.signOut().then(() => location.reload())" class="mt-6 px-6 py-2 border border-red-500 text-red-500 rounded-full hover:bg-red-50 transition">
                     Çıxış et
                 </button>
             </div>
-
         </div>
         
-        <!-- Footer -->
         <div class="bg-gray-50 px-6 py-4 text-center border-t border-gray-100">
-            <p class="text-xs text-gray-400">&copy; 2024 Bütün hüquqlar qorunur.</p>
+            <p class="text-xs text-gray-400">&copy; 2024 AzeSmmPanel</p>
         </div>
     </div>
 
-    <!-- Firebase SDK Scripts (Compat versiyası daha sadə inteqrasiya üçün) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <!-- Firebase SDK v10 (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <script>
-        // --- 1. FIREBASE KONFİQURASİYASI ---
-        // Sizin təqdim etdiyiniz konfiqurasiya
+        // Sizin Konfiqurasiya
         const firebaseConfig = {
             apiKey: "AIzaSyALBhMZoDFowkTROYa1awwo-3FbvmnJJpQ",
             authDomain: "azesmmpanel0.firebaseapp.com",
@@ -138,9 +131,11 @@
         };
 
         // Firebase-i işə salırıq
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const auth = firebase.auth();
-        auth.languageCode = 'az'; // SMS dilini Azərbaycan dilinə çevirir
+        auth.languageCode = 'az'; // SMS dilini Azərbaycan dili edirik
 
         // Dəyişənlər
         let confirmationResult = null;
@@ -151,86 +146,84 @@
 
         // Səhifə yüklənəndə ReCaptcha-nı hazırlayırıq
         window.onload = function() {
-            renderRecaptcha();
+            setupRecaptcha();
         };
 
-        function renderRecaptcha() {
-            if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-                    'size': 'invisible', // 'normal' etsəniz görünən robot testi çıxacaq
-                    'callback': (response) => {
-                        // ReCaptcha həll olundu
-                        console.log("ReCaptcha həll olundu");
-                    },
-                    'expired-callback': () => {
-                        showError("ReCaptcha vaxtı bitdi, yeniləyin.");
-                    }
-                });
+        function setupRecaptcha() {
+            // Əgər köhnə widget varsa, təmizləyirik ki, xəta verməsin
+            if (window.recaptchaVerifier) {
+                try {
+                    window.recaptchaVerifier.clear();
+                    window.recaptchaVerifier = null;
+                } catch(e) { console.log("Recaptcha clear error", e); }
+            }
+            document.getElementById('recaptcha-container').innerHTML = '';
+
+            // Yeni widget yaradılır
+            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                'size': 'normal', // Görünən "Mən robot deyiləm" qutusu
+                'callback': (response) => {
+                    console.log("ReCaptcha təsdiqləndi");
+                    hideError();
+                },
+                'expired-callback': () => {
+                    showError("ReCaptcha vaxtı bitdi. Yenidən cəhd edin.");
+                }
+            });
+            
+            try {
                 window.recaptchaVerifier.render();
+            } catch (e) {
+                console.error("Render xətası:", e);
             }
         }
 
-        // --- 2. KODU GÖNDƏR (Funksiya) ---
         function sendOTP() {
             const phoneNumber = phoneInput.value.trim();
-            
-            // Sadə validasiya
             if (phoneNumber.length < 9) {
-                showError("Zəhmət olmasa nömrəni düzgün daxil edin (məs: 501234567)");
+                showError("Nömrəni düzgün daxil edin (məs: 501234567)");
                 return;
             }
 
             setLoading('send', true);
             hideError();
 
-            // +994 prefiksini əlavə edirik
             const fullPhoneNumber = "+994" + phoneNumber;
-            console.log("SMS göndərilir: " + fullPhoneNumber);
-            
             const appVerifier = window.recaptchaVerifier;
 
             auth.signInWithPhoneNumber(fullPhoneNumber, appVerifier)
                 .then((result) => {
-                    // SMS göndərildi
-                    console.log("SMS uğurla göndərildi");
-                    confirmationResult = result;
+                    // Uğurlu SMS göndərildi
+                    window.confirmationResult = result;
                     setLoading('send', false);
                     
-                    // Addım 2-ə keçid
                     document.getElementById('step-phone').classList.add('hidden');
                     document.getElementById('step-otp').classList.remove('hidden');
                     document.getElementById('sent-number').innerText = fullPhoneNumber;
                 }).catch((error) => {
                     setLoading('send', false);
-                    console.error("SMS Xətası:", error);
+                    console.error("Firebase Error:", error);
                     
-                    // ReCaptcha-nı sıfırla ki, yenidən cəhd etmək olsun
-                    if (window.recaptchaVerifier) {
-                        try {
-                            window.recaptchaVerifier.clear();
-                            window.recaptchaVerifier = null;
-                            renderRecaptcha();
-                        } catch(e) { console.log("Recaptcha reset error", e); }
-                    }
+                    // ReCaptcha-nı sıfırlayırıq ki, istifadəçi yenidən cəhd edə bilsin
+                    setupRecaptcha();
 
+                    // Xətaları izah edirik
                     if (error.code === 'auth/invalid-phone-number') {
                         showError("Nömrə formatı yanlışdır.");
                     } else if (error.code === 'auth/too-many-requests') {
                         showError("Çox sayda cəhd edildi. Bir az sonra yoxlayın.");
-                    } else if (error.code === 'auth/network-request-failed') {
-                        showError("İnternet xətası. Lütfən əlaqəni yoxlayın.");
+                    } else if (error.message.includes("401") || error.code === 'auth/network-request-failed') {
+                        showError("API İcazə xətası. Zəhmət olmasa bir neçə dəqiqə gözləyib səhifəni yeniləyin.");
                     } else if (error.message.includes("authorized domain")) {
-                        showError("Domen icazəsi yoxdur. Firebase Console-da Authorized Domains-ə əlavə edin.");
+                        showError("Domen icazəsi hələ aktivləşməyib. 1-2 dəqiqə gözləyin.");
                     } else {
                         showError("Xəta: " + error.message);
                     }
                 });
         }
 
-        // --- 3. KODU TƏSDİQLƏ (Funksiya) ---
         function verifyOTP() {
             const code = otpInput.value.trim();
-            
             if (code.length !== 6) {
                 showError("Kod 6 rəqəmli olmalıdır.");
                 return;
@@ -239,25 +232,19 @@
             setLoading('verify', true);
             hideError();
 
-            confirmationResult.confirm(code).then((result) => {
-                // Uğurlu giriş
+            window.confirmationResult.confirm(code).then((result) => {
                 const user = result.user;
-                console.log("Uğurlu giriş:", user.uid);
                 setLoading('verify', false);
-                
-                // Uğur ekranına keçid
                 document.getElementById('step-otp').classList.add('hidden');
                 document.getElementById('step-success').classList.remove('hidden');
-                document.getElementById('user-uid').innerText = "User ID: " + user.uid;
-                
+                document.getElementById('user-uid').innerText = "ID: " + user.uid;
             }).catch((error) => {
                 setLoading('verify', false);
-                console.error("Təsdiq Xətası:", error);
-                showError("Kod yanlışdır və ya müddəti bitib.");
+                console.error(error);
+                showError("Kod yanlışdır.");
             });
         }
 
-        // Köməkçi funksiyalar
         function showError(msg) {
             errorDiv.classList.remove('hidden');
             errorText.innerText = msg;
@@ -286,19 +273,8 @@
         }
 
         function resetForm() {
-            document.getElementById('step-otp').classList.add('hidden');
-            document.getElementById('step-phone').classList.remove('hidden');
-            otpInput.value = '';
-            hideError();
-            
-            // ReCaptcha-nı yenilə
-            if(window.recaptchaVerifier) {
-                try {
-                    window.recaptchaVerifier.clear();
-                    window.recaptchaVerifier = null;
-                    renderRecaptcha();
-                } catch(e) {}
-            }
+            // Səhifəni tam yeniləyirik ki, hər şey sıfırlansın
+            location.reload();
         }
     </script>
 </body>
